@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>식권 사용 업체 안내 | Sono Trinity</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -203,6 +204,62 @@
     border-color: var(--ci-dark);
   }
 
+  /* Map */
+  .map-section {
+    margin-bottom: 28px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1.5px solid var(--border);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .map-section-header {
+    background: var(--surface);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .map-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .map-section-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  #map {
+    height: 420px;
+    width: 100%;
+  }
+  .leaflet-popup-content-wrapper {
+    border-radius: 10px !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+    font-family: 'Noto Sans KR', sans-serif !important;
+  }
+  .leaflet-popup-content {
+    margin: 10px 14px !important;
+    font-size: 13px !important;
+    line-height: 1.6 !important;
+  }
+  .popup-name { font-weight: 600; color: #3a3530; margin-bottom: 2px; }
+  .popup-cat { font-size: 11px; color: #9e968c; margin-bottom: 4px; }
+  .popup-link {
+    display: inline-block;
+    font-size: 11px;
+    color: #6b6158;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1px solid #6b6158;
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-top: 2px;
+  }
+  .popup-link:hover { background: #6b6158; color: #fff; }
+
   /* Category Tabs */
   .category-nav {
     display: flex;
@@ -327,6 +384,8 @@
   .map-hint::after {
     content: ' 네이버 지도에서 보기';
   }
+
+
   .restaurant-card::before {
     content: '';
     position: absolute;
@@ -496,6 +555,15 @@
     <button class="cat-tab" data-cat="카페·디저트"><span class="emoji">☕</span> 카페·디저트 <span class="count" id="cnt-카페·디저트"></span></button>
     <button class="cat-tab" data-cat="편의점"><span class="emoji">🏪</span> 편의점 <span class="count" id="cnt-편의점"></span></button>
     <button class="cat-tab" data-cat="기타"><span class="emoji">🍽️</span> 기타 <span class="count" id="cnt-기타"></span></button>
+  </div>
+
+  <!-- 지도 -->
+  <div class="map-section">
+    <div class="map-section-header">
+      <span class="map-section-title">📍 마곡 식당 지도</span>
+      <span class="map-section-sub">마곡중앙로 143 기준 · 클릭하면 네이버 지도로 이동</span>
+    </div>
+    <div id="map"></div>
   </div>
 
   <div class="results-bar">
@@ -746,7 +814,7 @@ function render() {
         </div>
         <div class="cards-grid">
           ${items.map(d => {
-            const cleanName = d.name.replace(/\(.*?\)/g, '').trim();
+            const cleanName = d.name.replace(/\(([^)]*)\)/g, ' $1').replace(/\s+/g, ' ').trim();
             const mapsUrl = `https://map.naver.com/v5/search/${encodeURIComponent(cleanName)}`;
             return `
             <a class="restaurant-card" data-cat="${d.cat}" href="${mapsUrl}" target="_blank" rel="noopener noreferrer">
@@ -801,6 +869,97 @@ document.getElementById('search').addEventListener('input', render);
 
 // Init
 render();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// 업체별 좌표 (마곡 지역 주요 건물 기준)
+const coords = {
+  // 마곡중앙로 143 (르웨스트시티/코엑스)
+  "마곡중앙로 143": [37.5604, 126.8281],
+  // 마곡중앙5로 6 (보타닉푸르지오시티)
+  "마곡중앙5로 6": [37.5618, 126.8338],
+  // 마곡중앙로 161
+  "마곡중앙로 161-17": [37.5630, 126.8352],
+  "마곡중앙로 161-22": [37.5632, 126.8356],
+  "마곡중앙로 161-11": [37.5628, 126.8350],
+  "마곡중앙로 161-8":  [37.5626, 126.8354],
+  "마곡중앙로 161-1":  [37.5624, 126.8348],
+  // 마곡중앙로 165
+  "마곡중앙로 165": [37.5636, 126.8360],
+  // 마곡중앙5로1길
+  "마곡중앙5로1길 20": [37.5621, 126.8344],
+  "마곡중앙5로1길 21": [37.5622, 126.8346],
+  // 공항대로 165 (원그로브)
+  "공항대로 165": [37.5562, 126.8305],
+  "공항대로165":  [37.5562, 126.8305],
+  // 마곡서로
+  "마곡서로 152": [37.5572, 126.8280],
+  "마곡서로 158": [37.5575, 126.8285],
+  "마곡서로 101": [37.5578, 126.8340],
+  "마곡서로 133": [37.5555, 126.8315],
+  // 기타
+  "양천로30길 123": [37.5650, 126.8395],
+  "마곡중앙5로 18": [37.5614, 126.8308],
+  "마곡중앙5로 22": [37.5610, 126.8298],
+  "마곡중앙8로5길 11": [37.5558, 126.8342],
+  "마곡중앙로 111": [37.5618, 126.8348],
+  "마곡중앙로6로 42": [37.5608, 126.8292],
+};
+
+function getCoords(addr) {
+  for (const key in coords) {
+    if (addr.includes(key)) return coords[key];
+  }
+  return null;
+}
+
+const catColors = {
+  "한식": "#a33226", "중식": "#b8441a", "일식": "#5c4080",
+  "양식": "#1a5a78", "카페·디저트": "#6b5030", "편의점": "#285e3e", "기타": "#555050"
+};
+
+function makeIcon(cat) {
+  const color = catColors[cat] || '#6b6158';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
+    <path d="M14 0C6.27 0 0 6.27 0 14c0 9.33 14 22 14 22S28 23.33 28 14C28 6.27 21.73 0 14 0z" fill="${color}"/>
+    <circle cx="14" cy="14" r="6" fill="white" opacity="0.9"/>
+  </svg>`;
+  return L.divIcon({
+    html: svg,
+    className: '',
+    iconSize: [28, 36],
+    iconAnchor: [14, 36],
+    popupAnchor: [0, -36]
+  });
+}
+
+// 지도 초기화
+const map = L.map('map', { zoomControl: true }).setView([37.5598, 126.8320], 15);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors',
+  maxZoom: 19
+}).addTo(map);
+
+// 소노트리니티 기준점 마커
+const baseIcon = L.divIcon({
+  html: `<div style="background:#4e4840;color:#fff;font-size:10px;font-weight:700;padding:4px 8px;border-radius:6px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.3);font-family:'Noto Sans KR',sans-serif;">🏢 소노트리니티</div>`,
+  className: '', iconAnchor: [50, 14]
+});
+L.marker([37.5604, 126.8281], { icon: baseIcon }).addTo(map);
+
+// 업체 마커
+data.forEach(d => {
+  const latlng = getCoords(d.addr);
+  if (!latlng) return;
+  const cleanName = d.name.replace(/\(([^)]*)\)/g, ' $1').replace(/\s+/g, ' ').trim();
+  const mapsUrl = `https://map.naver.com/v5/search/${encodeURIComponent(cleanName)}`;
+  const marker = L.marker(latlng, { icon: makeIcon(d.cat) }).addTo(map);
+  marker.bindPopup(`
+    <div class="popup-name">${d.name}</div>
+    <div class="popup-cat">${d.cat} · ${d.price.toLocaleString()}원권</div>
+    <a class="popup-link" href="${mapsUrl}" target="_blank">🗺️ 네이버 지도</a>
+  `);
+});
 </script>
 </body>
 </html>
