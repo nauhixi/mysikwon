@@ -720,7 +720,8 @@ function render() {
         </div>
         <div class="cards-grid">
           ${items.map(d => {
-            const mapsUrl = `https://map.naver.com/v5/search/${encodeURIComponent(d.name)}`;
+            const cleanName = d.name.replace(/\(.*?\)/g, '').trim();
+            const mapsUrl = `https://map.naver.com/v5/search/${encodeURIComponent(cleanName)}`;
             return `
             <a class="restaurant-card" data-cat="${d.cat}" href="${mapsUrl}" target="_blank" rel="noopener noreferrer">
               <div class="card-top">
@@ -732,6 +733,12 @@ function render() {
                 <span class="tag ${getPriceClass(d.price)}">${getPriceLabel(d.price)}</span>
               </div>
               <div class="card-addr">${d.addr}</div>
+              <div class="card-bottom">
+                <div class="stars" data-no="${d.no}">
+                  ${[1,2,3,4,5].map(v => `<span class="star" data-val="${v}">★</span>`).join('')}
+                </div>
+                <span class="rating-label" data-no="${d.no}">별점 남기기</span>
+              </div>
               <div class="map-hint"></div>
             </a>
           `}).join('')}
@@ -741,6 +748,8 @@ function render() {
   });
 
   content.innerHTML = html;
+  bindStarEvents();
+  data.forEach(d => updateStars(d.no));
 }
 
 // Events
