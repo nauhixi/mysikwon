@@ -1454,22 +1454,7 @@ subwayStations.forEach(st => {
     .bindPopup(`<div style="font-weight:700;font-size:13px;margin-bottom:5px;">🚇 ${st.name}</div><div>${badges}</div>`, { maxWidth: 200 });
 });
 
-// 범례
-const legend = L.control({ position: 'bottomleft' });
-legend.onAdd = function() {
-  const div = L.DomUtil.create('div');
-  div.style.cssText = `
-    background:white;padding:10px 14px;border-radius:10px;
-    box-shadow:0 2px 12px rgba(0,0,0,0.12);
-    font-family:'Noto Sans KR',sans-serif;font-size:11px;
-    line-height:1.9;
-  `;
-  div.innerHTML = Object.entries(catColors).map(([cat, color]) =>
-    `<div><span style="display:inline-block;width:10px;height:10px;background:${color};border-radius:50%;margin-right:5px;vertical-align:middle;"></span>${cat}</div>`
-  ).join('');
-  return div;
-};
-legend.addTo(map);
+
 </script>
 </body>
 </html>
