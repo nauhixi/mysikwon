@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>식권 사용 업체 안내 | Sono Trinity</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ci-dark: #6b6158;
+    --ci-darker: #4e4840;
+    --ci-light: #f5f2ee;
+    --ci-warm: #e8e2d9;
+    --bg: #f5f2ee;
+    --surface: #ffffff;
+    --border: #ddd8d0;
+    --text-primary: #3a3530;
+    --text-secondary: #6b6158;
+    --text-muted: #9e968c;
+    --accent-korean: #a33226;
+    --accent-chinese: #b8441a;
+    --accent-japanese: #5c4080;
+    --accent-western: #1a5a78;
+    --accent-cafe: #6b5030;
+    --accent-convenience: #285e3e;
+    --accent-other: #555050;
+    --ticket-8000: #edf2ec;
+    --ticket-8000-text: #285e3e;
+    --ticket-4500: #eaeff7;
+    --ticket-4500-text: #1a3e78;
+    --ticket-5000: #f5ede4;
+    --ticket-5000-text: #78401a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: var(--ci-dark);
+    color: #fff;
+    padding: 40px 32px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, var(--ci-darker) 0%, var(--ci-dark) 60%, #7a7068 100%);
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: rgba(255,255,255,0.12);
+  }
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .ci-logo {
+    font-family: 'Cormorant Garamond', 'Noto Serif KR', serif;
+    font-size: 13px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 18px;
+    font-weight: 400;
+  }
+  .ci-logo span {
+    display: inline-block;
+    width: 24px;
+    height: 1px;
+    background: rgba(255,255,255,0.35);
+    vertical-align: middle;
+    margin: 0 10px;
+  }
+  .header-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 10px;
+    font-weight: 300;
+  }
+  .header-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(22px, 4vw, 36px);
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .header-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    font-weight: 300;
+    letter-spacing: 0.3px;
+  }
+  .header-stats {
+    display: flex;
+    gap: 28px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+  }
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+  }
+  .stat-num {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1;
+    font-family: 'Cormorant Garamond', serif;
+  }
+  .stat-label {
+    font-size: 10px;
+    color: rgba(255,255,255,0.38);
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+  }
+  .stat-divider {
+    width: 1px;
+    background: rgba(255,255,255,0.12);
+    align-self: stretch;
+  }
+
+  /* Main */
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+
+  /* Search & Filter */
+  .controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+  }
+  .search-icon {
+    position: absolute;
+    left: 14px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+  .search-input {
+    width: 100%;
+    padding: 11px 14px 11px 40px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--ci-dark); }
+
+  .price-filter {
+    display: flex;
+    gap: 6px;
+  }
+  .price-btn {
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .price-btn:hover { border-color: var(--ci-dark); }
+  .price-btn.active {
+    background: var(--ci-dark);
+    color: #fff;
+    border-color: var(--ci-dark);
+  }
+
+  /* Map */
+  .map-section {
+    margin-bottom: 28px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1.5px solid var(--border);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .map-section-header {
+    background: var(--surface);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .map-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .map-section-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  #map {
+    height: 420px;
+    width: 100%;
+  }
+  .leaflet-popup-content-wrapper {
+    border-radius: 10px !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+    font-family: 'Noto Sans KR', sans-serif !important;
+  }
+  .leaflet-popup-content {
+    margin: 10px 14px !important;
+    font-size: 13px !important;
+    line-height: 1.6 !important;
+  }
+  .popup-name { font-weight: 600; color: #3a3530; margin-bottom: 2px; }
+  .popup-cat { font-size: 11px; color: #9e968c; margin-bottom: 4px; }
+  .popup-link {
+    display: inline-block;
+    font-size: 11px;
+    color: #6b6158;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1px solid #6b6158;
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-top: 2px;
+  }
+  .popup-link:hover { background: #6b6158; color: #fff; }
+
+  /* Category Tabs */
+  .category-nav {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .cat-tab {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    border-radius: 50px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+  .cat-tab:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.07); }
+  .cat-tab.active {
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .cat-tab .emoji { font-size: 16px; }
+  .cat-tab .count {
+    font-size: 11px;
+    background: rgba(255,255,255,0.25);
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+  .cat-tab.active .count { background: rgba(255,255,255,0.3); }
+
+  .cat-tab[data-cat="전체"].active { background: var(--ci-dark); }
+  .cat-tab[data-cat="한식"].active { background: var(--accent-korean); }
+  .cat-tab[data-cat="중식"].active { background: var(--accent-chinese); }
+  .cat-tab[data-cat="일식"].active { background: var(--accent-japanese); }
+  .cat-tab[data-cat="양식"].active { background: var(--accent-western); }
+  .cat-tab[data-cat="카페·디저트"].active { background: var(--accent-cafe); }
+  .cat-tab[data-cat="편의점"].active { background: var(--accent-convenience); }
+  .cat-tab[data-cat="기타"].active { background: var(--accent-other); }
+
+  /* Location group */
+  .location-group {
+    margin-bottom: 36px;
+  }
+  .location-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border);
+  }
+  .location-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--ci-dark);
+    flex-shrink: 0;
+  }
+  .location-name {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ci-dark);
+  }
+  .location-count {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* Cards Grid */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  .restaurant-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    display: block;
+    color: inherit;
+  }
+  .restaurant-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+    border-color: #b0a090;
+  }
+  .restaurant-card:hover .map-hint {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .map-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--ci-dark);
+    font-weight: 500;
+    margin-top: 6px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: all 0.18s;
+  }
+  .map-hint::before {
+    content: '🗺️';
+    font-size: 12px;
+  }
+  .map-hint::after {
+    content: ' 네이버 지도에서 보기';
+  }
+
+
+  .restaurant-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 14px 14px 0 0;
+  }
+  .restaurant-card[data-cat="한식"]::before { background: var(--accent-korean); }
+  .restaurant-card[data-cat="중식"]::before { background: var(--accent-chinese); }
+  .restaurant-card[data-cat="일식"]::before { background: var(--accent-japanese); }
+  .restaurant-card[data-cat="양식"]::before { background: var(--accent-western); }
+  .restaurant-card[data-cat="카페·디저트"]::before { background: var(--accent-cafe); }
+  .restaurant-card[data-cat="편의점"]::before { background: var(--accent-convenience); }
+  .restaurant-card[data-cat="기타"]::before { background: var(--accent-other); }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .card-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+    flex: 1;
+  }
+  .card-num {
+    font-size: 11px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .card-tags {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .tag-cat {
+    background: #f0ebe3;
+    color: var(--text-secondary);
+  }
+  .tag-price-8000 { background: var(--ticket-8000); color: var(--ticket-8000-text); }
+  .tag-price-4500 { background: var(--ticket-4500); color: var(--ticket-4500-text); }
+  .tag-price-5000 { background: var(--ticket-5000); color: var(--ticket-5000-text); }
+
+  .card-addr {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-top: 2px;
+  }
+
+  /* Star Rating */
+  .card-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+  .stars {
+    display: flex;
+    gap: 2px;
+  }
+  .star {
+    font-size: 16px;
+    cursor: pointer;
+    color: #ddd;
+    transition: color 0.1s, transform 0.1s;
+    line-height: 1;
+  }
+  .star.filled { color: #f5a623; }
+  .star:hover { transform: scale(1.2); }
+  .rating-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: 5px;
+  }
+  .rating-label.has-rating { color: #f5a623; font-weight: 600; }
+
+  /* No results */
+  .no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+
+  /* Mode switch buttons */
+  .mode-switch {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .mode-btn {
+    padding: 8px 20px;
+    border-radius: 30px;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .mode-btn:hover {
+    border-color: rgba(255,255,255,0.6);
+    color: rgba(255,255,255,0.9);
+  }
+  .mode-btn.active {
+    background: #fff;
+    border-color: #fff;
+    color: var(--ci-dark);
+    font-weight: 700;
+  }
+
+  /* Section visibility */
+  .maogok-section { display: block; }
+  .maogok-section.hidden { display: none; }
+  .airport-section-wrap { display: none; }
+  .airport-section-wrap.visible { display: block; }
+
+  /* Airport Section */
+  .airport-section {
+    margin-bottom: 28px;
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .airport-section-header {
+    background: var(--ci-dark);
+    color: #fff;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .airport-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 14px 16px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    background: #faf8f5;
+  }
+  .airport-tab {
+    padding: 7px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: #fff;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .airport-tab:hover { border-color: var(--ci-dark); color: var(--ci-dark); }
+  .airport-tab.active { background: var(--ci-dark); color: #fff; border-color: var(--ci-dark); }
+  .airport-content { padding: 16px; display: none; }
+  .airport-content.active { display: block; }
+  .airport-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .airport-table th {
+    background: #f5f1eb;
+    color: var(--ci-dark);
+    font-weight: 600;
+    padding: 9px 12px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    font-size: 12px;
+  }
+  .airport-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #f0ebe3;
+    color: var(--text-primary);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .airport-table tr:last-child td { border-bottom: none; }
+  .airport-table tr:hover td { background: #faf7f2; }
+  .airport-table td:first-child { color: var(--text-muted); font-size: 11px; width: 32px; text-align: center; }
+  .price-badge-airport { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .price-high { background: #edf2ec; color: #285e3e; }
+  .price-mid  { background: #f5ede4; color: #78401a; }
+  .price-low  { background: #eaeff7; color: #1a3e78; }
+  .airport-note { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+
+  /* Count bar */
+  .results-bar {
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .results-bar strong { color: var(--text-primary); }
+
+  @media (max-width: 640px) {
+    .header { padding: 28px 20px 24px; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .price-filter { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="ci-logo">Sono Trinity<span></span>Meal Ticket Guide</div>
+    <div class="header-label">마곡 캠퍼스 · 식권 가이드</div>
+    <div class="header-title">식권 사용 가능 업체</div>
+
+    <div class="mode-switch">
+      <button class="mode-btn active" id="mode-maogok">🏢 신사옥 주변</button>
+      <button class="mode-btn" id="mode-airport">✈️ 공항</button>
+    </div>
+    <div class="header-stats">
+      <div class="stat-item">
+        <span class="stat-num" id="total-stat">107</span>
+        <span class="stat-label">전체 업체</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-num">8,000</span>
+        <span class="stat-label">식사권 (원)</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-num">4,500</span>
+        <span class="stat-label">음료권 (원)</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-num">5,000</span>
+        <span class="stat-label">편의점권 (원)</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+  <!-- 마곡 신사옥 섹션 -->
+  <div id="maogok-wrap" class="maogok-section">
+  <div class="controls">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="search" type="text" placeholder="업체명으로 검색...">
+    </div>
+    <div class="price-filter">
+      <button class="price-btn active" data-price="전체">전체</button>
+      <button class="price-btn" data-price="8000">🍱 8,000원</button>
+      <button class="price-btn" data-price="4500">☕ 4,500원</button>
+      <button class="price-btn" data-price="5000">🏪 5,000원</button>
+    </div>
+  </div>
+
+  <div class="category-nav" id="category-nav">
+    <button class="cat-tab active" data-cat="전체"><span class="emoji">🗺️</span> 전체 <span class="count" id="cnt-전체"></span></button>
+    <button class="cat-tab" data-cat="한식"><span class="emoji">🍲</span> 한식 <span class="count" id="cnt-한식"></span></button>
+    <button class="cat-tab" data-cat="중식"><span class="emoji">🥟</span> 중식 <span class="count" id="cnt-중식"></span></button>
+    <button class="cat-tab" data-cat="일식"><span class="emoji">🍣</span> 일식 <span class="count" id="cnt-일식"></span></button>
+    <button class="cat-tab" data-cat="양식"><span class="emoji">🍔</span> 양식 <span class="count" id="cnt-양식"></span></button>
+    <button class="cat-tab" data-cat="카페·디저트"><span class="emoji">☕</span> 카페·디저트 <span class="count" id="cnt-카페·디저트"></span></button>
+    <button class="cat-tab" data-cat="편의점"><span class="emoji">🏪</span> 편의점 <span class="count" id="cnt-편의점"></span></button>
+    <button class="cat-tab" data-cat="기타"><span class="emoji">🍽️</span> 기타 <span class="count" id="cnt-기타"></span></button>
+  </div>
+
+  <!-- 지도 -->
+  <div class="map-section">
+    <div class="map-section-header">
+      <span class="map-section-title">📍 마곡 식당 지도</span>
+      <span class="map-section-sub">마곡중앙로 143 기준 · 클릭하면 네이버 지도로 이동</span>
+    </div>
+    <div id="map"></div>
+  </div>
+
+  <div class="results-bar">
+    <strong id="results-count"></strong> <span id="results-label">개 업체</span>
+  </div>
+
+  <div id="content"></div>
+  </div><!-- /maogok-wrap -->
+
+  <!-- 공항별 사용처 -->
+  <div id="airport-wrap" class="airport-section-wrap">
+  <div class="airport-section">
+    <div class="airport-section-header">
+      ✈️ 공항별 식권 사용처
+    </div>
+    <div class="airport-tabs">
+      <button class="airport-tab active" data-airport="김포공항">🛫 김포공항</button>
+      <button class="airport-tab" data-airport="인천공항">🛫 인천공항</button>
+      <button class="airport-tab" data-airport="제주공항">🛫 제주공항</button>
+      <button class="airport-tab" data-airport="대구공항">🛫 대구공항</button>
+      <button class="airport-tab" data-airport="광주공항">🛫 광주공항</button>
+      <button class="airport-tab" data-airport="김해공항">🛫 김해공항</button>
+      <button class="airport-tab" data-airport="청주공항">🛫 청주공항</button>
+      <button class="airport-tab" data-airport="양양공항">🛫 양양공항</button>
+      <button class="airport-tab" data-airport="부천대학교">🏫 부천대학교</button>
+    </div>
+    <div id="airport-content-wrap"></div>
+  </div>
+  </div><!-- /airport-wrap -->
+</main>
+
+<script>
+const data = [
+  { no:1, loc:"마곡나루역", name:"㈜에렉스 카페테리아", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 143 (마곡동) 본동 지하1층" },
+  { no:2, loc:"마곡코엑스", name:"오제제", price:8000, cat:"기타", addr:"서울특별시 강서구 마곡중앙로 143 (마곡동) 지하2층" },
+  { no:3, loc:"마곡코엑스", name:"페이페이", price:8000, cat:"중식", addr:"서울특별시 강서구 마곡중앙로 143 (마곡동) 지하 2층" },
+  { no:4, loc:"마곡동", name:"제이스팟", price:8000, cat:"기타", addr:"서울특별시 강서구 마곡중앙로 143 (마곡동) 지하2층 208호" },
+  { no:5, loc:"마곡코엑스", name:"어부몽", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 143 (마곡동) 지하 2층" },
+  { no:6, loc:"마곡코엑스", name:"정성순대", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 143 (마곡동) 지하 2층" },
+  { no:7, loc:"마곡코엑스", name:"고부대", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 143 (마곡동) 지하2층" },
+  { no:8, loc:"마곡코엑스", name:"동원홈푸드 크리스피 프레시", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로143 르웨스트시티 지하2층" },
+  { no:9, loc:"마곡코엑스", name:"동원홈푸드 포르투세븐", price:8000, cat:"양식", addr:"서울특별시 강서구 마곡중앙로143 르웨스트시티 지하2층" },
+  { no:10, loc:"마곡코엑스", name:"상해루", price:8000, cat:"중식", addr:"서울특별시 강서구 마곡중앙로 143 (마곡동) 지하 2층" },
+  { no:11, loc:"마곡나루역", name:"오근내10닭갈비", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 143 (마곡동) 본동 지하2층 230,231호" },
+  { no:12, loc:"마곡동", name:"흑토포케(마곡점)", price:8000, cat:"양식", addr:"서울특별시 강서구 마곡중앙로6로 42 1층 111호" },
+  { no:13, loc:"마곡동", name:"남원식당", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡서로 101 (마곡동) 214,215,216호" },
+  { no:14, loc:"마곡동", name:"밥플러스(마곡케이스퀘어점)", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 105-7 (마곡동) B동 지하2층" },
+  { no:15, loc:"마곡나루역", name:"버거리", price:8000, cat:"양식", addr:"서울특별시 강서구 마곡서로152 A동 114호" },
+  { no:16, loc:"마곡동", name:"청가(마곡 두산랜드B동 2층)", price:8000, cat:"중식", addr:"서울특별시 강서구 마곡서로 152 마곡동, 두산더랜드타워 B동 2층" },
+  { no:17, loc:"마곡나루역", name:"셀러디(마곡나루역점)", price:8000, cat:"양식", addr:"서울 강서구 마곡중앙5로 6, 1층" },
+  { no:18, loc:"마곡나루역", name:"KFC(마곡나루점)", price:8000, cat:"양식", addr:"서울특별시 강서구 마곡중앙5로 6 1층" },
+  { no:19, loc:"마곡동", name:"전주옥가마솥곰탕", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙5로 6 (마곡동) 서관 B123호" },
+  { no:20, loc:"마곡동", name:"달인 대보손칼국수", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙5로 6 2층 211호" },
+  { no:21, loc:"마곡나루역", name:"등촌샤브칼국수(마곡점)", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙5로 6 (마곡동) 2층" },
+  { no:22, loc:"마곡나루역", name:"포케올데이(마곡나루역점)", price:8000, cat:"양식", addr:"서울특별시 강서구 마곡중앙5로 6 2층 225호" },
+  { no:23, loc:"마곡나루역", name:"퀴즈노스(마곡나루역점)", price:8000, cat:"양식", addr:"서울특별시 강서구 마곡중앙5로 6 154호" },
+  { no:24, loc:"마곡나루역", name:"역전우동(마곡나루역점)", price:8000, cat:"일식", addr:"서울특별시 강서구 마곡중앙5로 6 1층 114호" },
+  { no:25, loc:"마곡나루역", name:"차이나는 감자탕", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙5로 6 201호" },
+  { no:26, loc:"마곡동", name:"우주공간", price:8000, cat:"기타", addr:"서울특별시 강서구 마곡중앙5로 6 (마곡동) 서관 1층 136호" },
+  { no:27, loc:"마곡동", name:"최원재 함흥냉면", price:8000, cat:"한식", addr:"서울특별시 강서구 양천로30길 123-9 (마곡동, 신안아파트)" },
+  { no:28, loc:"마곡동", name:"츠키제(원그로브점)", price:8000, cat:"일식", addr:"서울특별시 강서구 공항대로 165 (마곡동) B동 지하1층 BE111호" },
+  { no:29, loc:"마곡동", name:"이완미엔(원그로브점)", price:8000, cat:"중식", addr:"서울특별시 강서구 공항대로 165 (마곡동) C동 1층 W114호" },
+  { no:30, loc:"마곡동", name:"탄탄면공방 더블랙(원그로브점)", price:8000, cat:"중식", addr:"서울특별시 강서구 공항대로165 원그로브 B동 지하 1층 EB120호" },
+  { no:31, loc:"마곡동", name:"삼청동샤브(원그로브점)", price:8000, cat:"한식", addr:"서울특별시 강서구 공항대로 165 (마곡동) A동 E109호 1층" },
+  { no:32, loc:"마곡동", name:"주식회사 중앙해장(원그로브점)", price:8000, cat:"한식", addr:"서울특별시 강서구 공항대로 165 (마곡동) 원그로브 쇼핑몰 1층" },
+  { no:33, loc:"마곡동", name:"만사부(원그로브점)", price:8000, cat:"중식", addr:"서울특별시 강서구 공항대로 165 (마곡동)" },
+  { no:34, loc:"마곡동", name:"가족회관(원그로브점)", price:8000, cat:"한식", addr:"서울특별시 강서구 공항대로 165 (마곡동) B1층 EB112호" },
+  { no:35, loc:"마곡동", name:"페이홍러우(원그로브점)", price:8000, cat:"중식", addr:"서울특별시 강서구 공항대로 165 (마곡동) 2층 E211-1호" },
+  { no:36, loc:"마곡동", name:"딤딤섬(원그로브점)", price:8000, cat:"중식", addr:"서울특별시 강서구 공항대로165 C동 1층 W109~W111호" },
+  { no:37, loc:"마곡동", name:"더 레어(원그로브점)", price:8000, cat:"양식", addr:"서울특별시 강서구 공항대로165 C동 2층 W219호" },
+  { no:38, loc:"마곡동", name:"공탕", price:8000, cat:"한식", addr:"서울특별시 강서구 공항대로165 1층 E103호" },
+  { no:39, loc:"마곡동", name:"숙성도", price:8000, cat:"한식", addr:"서울특별시 강서구 공항대로 165 (마곡동) 1층 E104호, 105호, 106호" },
+  { no:40, loc:"마곡동", name:"을지깐깐(원그로브점)", price:8000, cat:"한식", addr:"서울특별시 강서구 공항대로165 지하1층 EB115호" },
+  { no:41, loc:"마곡동", name:"유키모찌(원그로브점)", price:8000, cat:"일식", addr:"서울특별시 강서구 공항대로 165 (마곡동) 디동 1층 더블유108호" },
+  { no:42, loc:"마곡동", name:"하우스오브디라이프스타키친(원그로브점)", price:8000, cat:"양식", addr:"서울특별시 강서구 공항대로 165 (마곡동) B1층 EB116, 117호" },
+  { no:43, loc:"마곡동", name:"버거킹(마곡원그로브몰D점)", price:8000, cat:"양식", addr:"서울특별시 강서구 공항대로 165 원그로브, 지하 1층 EB122호" },
+  { no:44, loc:"마곡동", name:"스시마우(원그로브점)", price:8000, cat:"일식", addr:"서울특별시 강서구 공항대로 165 (마곡동) A동 지하1층 EB114" },
+  { no:45, loc:"마곡동", name:"봉혜자네주방(원그로브점)", price:8000, cat:"한식", addr:"서울특별시 강서구 공항대로 165 (마곡동) A동 1층 E107호" },
+  { no:46, loc:"마곡동", name:"랄라루들(원그로브점)", price:8000, cat:"기타", addr:"서울특별시 강서구 공항대로 165 (마곡동) 원그로브 쇼핑몰 1층 이108호" },
+  { no:47, loc:"마곡동", name:"고동경양(원그로브점)", price:8000, cat:"양식", addr:"서울특별시 강서구 공항대로 165 (마곡동) A동 1층 E107호" },
+  { no:48, loc:"마곡동", name:"잣품은그집호두과자", price:8000, cat:"카페·디저트", addr:"서울특별시 강서구 공항대로 165 (마곡동) 1층 W113" },
+  { no:49, loc:"마곡동", name:"마츠노하나(원그로브점)", price:8000, cat:"일식", addr:"서울특별시 강서구 공항대로 165 (마곡동) 지하1층 EB188호" },
+  { no:50, loc:"마곡동", name:"테라로사(원그로브점)", price:8000, cat:"카페·디저트", addr:"서울특별시 강서구 공항대로 165 원그로브 쇼핑몰 D동 1층" },
+  { no:51, loc:"마곡동", name:"모모유부원(원그로브점)", price:8000, cat:"일식", addr:"서울특별시 강서구 공항대로 165 (마곡동) 1층 E113호" },
+  { no:52, loc:"마곡동", name:"예원", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 161-17 119~120호" },
+  { no:53, loc:"마곡나루역", name:"얌샘김밥(마곡나루역점)", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 161-17 (마곡동) 108호" },
+  { no:54, loc:"마곡나루역", name:"코코이찌방야(마곡나루역점)", price:8000, cat:"기타", addr:"서울특별시 강서구 마곡중앙로 161-17 2층 210호" },
+  { no:55, loc:"마곡동", name:"주식회사 석봉토스트", price:8000, cat:"기타", addr:"서울특별시 강서구 마곡중앙로 161-17 마곡동, 보타닉파크타워Ⅰ" },
+  { no:56, loc:"마곡나루역", name:"송쭈집(마곡나루점)", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡서로 158 2층 208~209호" },
+  { no:57, loc:"마곡동", name:"한주가", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 161-11 (마곡동) 2층" },
+  { no:58, loc:"마곡나루역", name:"응급실떡볶이(마곡나루역점)", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 161-1 (마곡동) 114호" },
+  { no:59, loc:"마곡동", name:"일품한우", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 161-22 215~219호" },
+  { no:60, loc:"마곡나루역", name:"153구포국수(마곡나루역점)", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 161-22 (마곡동) 1층 120호" },
+  { no:61, loc:"마곡나루역", name:"보승회관(마곡나루역점)", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙5로1길 20 (마곡동) 1층 103~104호" },
+  { no:62, loc:"마곡동", name:"원스짬뽕", price:8000, cat:"중식", addr:"서울특별시 강서구 마곡중앙5로1길 20 (마곡동) 2층" },
+  { no:63, loc:"마곡동", name:"연희김밥", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙5로1길 20 1층 102호" },
+  { no:64, loc:"마곡나루역", name:"새마을식당(마곡나루역점)", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 165 1층 105~106호" },
+  { no:65, loc:"마곡나루역", name:"란콰이펑누들(마곡나루점)", price:8000, cat:"중식", addr:"서울특별시 강서구 마곡중앙로 165, 101호" },
+  { no:66, loc:"마곡동", name:"대박이네 한식뷔페", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 165 (마곡동) 지하1층" },
+  { no:67, loc:"마곡나루역", name:"원조감자탕 일미집(마곡나루역점)", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙5로1길 21 (마곡동) 104호" },
+  { no:68, loc:"마곡동", name:"보경손수제비", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 161-8 마곡동, 두산더랜드파크" },
+  { no:69, loc:"마곡동", name:"지피다", price:8000, cat:"기타", addr:"서울특별시 강서구 마곡중앙로 161-8 (마곡동) B동 1층 106, 107호" },
+  { no:70, loc:"마곡나루역", name:"나루동태탕(마곡나루점)", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 161-8 마곡동, 두산더랜드파크 B동 210호" },
+  { no:71, loc:"마곡동", name:"동호정", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 161-8 비동 101,102호" },
+  { no:72, loc:"마곡나루역", name:"본죽&비빔밥(마곡나루역점)", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 161-8 두산더랜드파크 1층 A-105호" },
+  { no:73, loc:"마곡코엑스", name:"진진수라(마곡코엑스점)", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 143 (마곡동) 지하 2층" },
+  { no:74, loc:"마곡나루역", name:"오봉집(마곡나루점)", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙5로 6 (마곡동) 1층" },
+  { no:75, loc:"마곡나루역", name:"참이맛감자탕(마곡나루역점)", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 161-17 (마곡동) 1층 103-104호" },
+  { no:76, loc:"마곡코엑스", name:"고부대(마곡코엑스점)", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙로 143 (마곡동) 지하2층" },
+  { no:77, loc:"마곡코엑스", name:"브레디몽(마곡코엑스점)", price:8000, cat:"카페·디저트", addr:"서울특별시 강서구 마곡중앙로 143 (마곡동) 본동 지하 2층 232호" },
+  { no:78, loc:"마곡코엑스", name:"삼청당(마곡코엑스점)", price:8000, cat:"카페·디저트", addr:"서울특별시 강서구 마곡중앙로 111, 지하2층 B235호, 236호" },
+  { no:79, loc:"마곡동", name:"소복집", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡서로 158 (마곡동) 1층 116호" },
+  { no:80, loc:"마곡동", name:"침스버거", price:8000, cat:"양식", addr:"서울특별시 강서구 마곡중앙로 143 (마곡동) 본동 지하2층 211호" },
+  { no:81, loc:"마곡동", name:"도니랑 김치생삼겹", price:8000, cat:"한식", addr:"서울특별시 강서구 마곡중앙5로 18 (마곡동) 1층" },
+  { no:82, loc:"마곡동", name:"웨이", price:8000, cat:"기타", addr:"서울특별시 강서구 마곡중앙5로 6 (마곡동) 2층 218호" },
+  { no:83, loc:"마곡나루역", name:"팀홀튼(마곡나루역점)", price:4500, cat:"카페·디저트", addr:"서울특별시 강서구 마곡중앙로 143 르웨스트시티 A동 1층" },
+  { no:84, loc:"마곡코엑스", name:"커피기업(마곡코엑스점)", price:4500, cat:"카페·디저트", addr:"서울특별시 강서구 마곡중앙로 143 (마곡동) 지하 2층" },
+  { no:85, loc:"마곡동", name:"메가MGC커피(마곡엠밸리7단지점)", price:4500, cat:"카페·디저트", addr:"서울특별시 강서구 마곡서로 133, 714동 1층 101호" },
+  { no:86, loc:"마곡동", name:"파란만잔(마곡미라밸점)", price:4500, cat:"카페·디저트", addr:"서울특별시 강서구 마곡서로 101 (마곡동) 1층 117호" },
+  { no:87, loc:"마곡동", name:"매머드익스프레스(마곡두산랜드타워점)", price:4500, cat:"카페·디저트", addr:"서울특별시 강서구 마곡서로 152, 에이동 105호" },
+  { no:88, loc:"마곡나루역", name:"설빙(마곡나루점)", price:4500, cat:"카페·디저트", addr:"서울특별시 강서구 마곡중앙5로 6 2층" },
+  { no:89, loc:"마곡나루역", name:"투썸플레이스(마곡나루역점)", price:4500, cat:"카페·디저트", addr:"서울특별시 강서구 마곡중앙5로 6 마곡보타닉푸르지오시티" },
+  { no:90, loc:"마곡동", name:"와플샵(원그로브점)", price:4500, cat:"카페·디저트", addr:"서울특별시 강서구 공항대로 165 (마곡동) 1층 W107호" },
+  { no:91, loc:"마곡동", name:"공차(원그로브점)", price:4500, cat:"카페·디저트", addr:"서울특별시 강서구 공항대로 165 B동 1층 E120" },
+  { no:92, loc:"마곡동", name:"팀홀튼(원그로브점)", price:4500, cat:"카페·디저트", addr:"서울특별시 강서구 공항대로 165 원그로브몰 지상1층 E110호" },
+  { no:93, loc:"마곡나루역", name:"더벤티(마곡나루역점)", price:4500, cat:"카페·디저트", addr:"서울특별시 강서구 마곡중앙로 161-11 (마곡동) 에이동 110호" },
+  { no:94, loc:"마곡동", name:"카페디얼", price:4500, cat:"카페·디저트", addr:"서울특별시 강서구 마곡중앙로 161-22 상가동 1층 102호" },
+  { no:95, loc:"마곡나루역", name:"파리바게뜨(마곡나루역점)", price:4500, cat:"카페·디저트", addr:"서울시 강서구 마곡중앙5로 1길 20 1층 114,115호" },
+  { no:96, loc:"마곡나루역", name:"빽다방(마곡나루역북부점)", price:4500, cat:"카페·디저트", addr:"서울특별시 강서구 마곡중앙5로1길 20 마곡나루역보타닉비즈타워 1층 101호" },
+  { no:97, loc:"마곡나루역", name:"매머드익스프레스(마곡나루점)", price:4500, cat:"카페·디저트", addr:"서울특별시 강서구 마곡중앙5로1길 20 1층 111호" },
+  { no:98, loc:"마곡나루역", name:"공차(마곡나루점)", price:4500, cat:"카페·디저트", addr:"서울특별시 강서구 마곡중앙로 165 안강프라이빗타워" },
+  { no:99, loc:"마곡나루역", name:"주씨(마곡나루점)", price:4500, cat:"카페·디저트", addr:"서울특별시 강서구 마곡중앙로 161-8 A동 1층 112호" },
+  { no:100, loc:"마곡동", name:"우지커피(마곡파인스퀘어점)", price:4500, cat:"카페·디저트", addr:"서울특별시 강서구 마곡중앙8로5길 11, 1층 110호" },
+  { no:101, loc:"마곡동", name:"CU(마곡웰튼점)", price:5000, cat:"편의점", addr:"서울특별시 강서구 마곡중앙5로 22(마곡동)" },
+  { no:102, loc:"마곡동", name:"GS25(마곡보타닉점)", price:5000, cat:"편의점", addr:"서울특별시 강서구 마곡동 760번지 109 128 129호" },
+  { no:103, loc:"마곡나루역", name:"CU(마곡나루역캐슬파크점)", price:5000, cat:"편의점", addr:"서울특별시 강서구 마곡중앙로 161-1 마곡나루역캐슬파크" },
+  { no:104, loc:"마곡나루역", name:"GS25(마곡나루역점)", price:5000, cat:"편의점", addr:"서울특별시 강서구 마곡중앙로 지하 135, 지하1층" },
+  { no:105, loc:"마곡나루역", name:"GS25(S9마곡나루역점)", price:5000, cat:"편의점", addr:"서울특별시 강서구 마곡중앙5로 지하 2 (마곡나루역 9호선)" },
+  { no:106, loc:"마곡코엑스", name:"세븐일레븐(마곡코엑스점)", price:5000, cat:"편의점", addr:"서울특별시 강서구 마곡중앙로 143 르웨스트시티 본동 지하2층 C103호" },
+  { no:107, loc:"마곡동", name:"CU(마곡르웨스트점)", price:5000, cat:"편의점", addr:"서울특별시 강서구 마곡중앙로 111, 104동 1층 165호" },
+];
+
+const catOrder = ["전체","한식","중식","일식","양식","카페·디저트","편의점","기타"];
+const locOrder = ["마곡나루역","마곡코엑스","마곡동"];
+
+let activecat = "전체";
+let activeprice = "전체";
+
+function getPriceClass(p) {
+  if(p===8000) return 'tag-price-8000';
+  if(p===4500) return 'tag-price-4500';
+  return 'tag-price-5000';
+}
+function getPriceLabel(p) {
+  if(p===8000) return '🍱 8,000원';
+  if(p===4500) return '☕ 4,500원';
+  return '🏪 5,000원';
+}
+
+// Rating storage
+function getRating(no) {
+  return parseInt(localStorage.getItem('rating_' + no) || '0');
+}
+function setRating(no, val) {
+  localStorage.setItem('rating_' + no, val);
+}
+function getRatingLabel(r) {
+  const labels = ['', '별로예요', '그저그래요', '괜찮아요', '맛있어요', '최고예요!'];
+  return labels[r] || '';
+}
+
+function handleStarClick(e, no) {
+  e.preventDefault();
+  e.stopPropagation();
+  const val = parseInt(e.currentTarget.dataset.val);
+  const current = getRating(no);
+  // 같은 별 누르면 취소
+  setRating(no, current === val ? 0 : val);
+  updateStars(no);
+}
+
+function handleStarHover(e, no) {
+  const val = parseInt(e.currentTarget.dataset.val);
+  const starsEl = document.querySelectorAll(`.stars[data-no="${no}"] .star`);
+  starsEl.forEach(s => {
+    s.classList.toggle('filled', parseInt(s.dataset.val) <= val);
+  });
+}
+
+function handleStarLeave(no) {
+  updateStars(no);
+}
+
+function updateStars(no) {
+  const r = getRating(no);
+  const starsEl = document.querySelectorAll(`.stars[data-no="${no}"] .star`);
+  starsEl.forEach(s => {
+    s.classList.toggle('filled', parseInt(s.dataset.val) <= r);
+  });
+  const label = document.querySelector(`.rating-label[data-no="${no}"]`);
+  if (label) {
+    label.textContent = r > 0 ? getRatingLabel(r) : '별점 남기기';
+    label.classList.toggle('has-rating', r > 0);
+  }
+}
+
+function bindStarEvents() {
+  document.querySelectorAll('.stars').forEach(starsEl => {
+    const no = starsEl.dataset.no;
+    starsEl.querySelectorAll('.star').forEach(star => {
+      star.addEventListener('click', e => handleStarClick(e, no));
+      star.addEventListener('mouseenter', e => handleStarHover(e, no));
+    });
+    starsEl.addEventListener('mouseleave', () => handleStarLeave(no));
+  });
+}
+
+function getFiltered() {
+  return data.filter(d => {
+    const catMatch = activecat === "전체" || d.cat === activecat;
+    const priceMatch = activeprice === "전체" || d.price === parseInt(activeprice);
+    const q = document.getElementById('search').value.trim().toLowerCase();
+    const searchMatch = !q || d.name.toLowerCase().includes(q) || d.loc.includes(q);
+    return catMatch && priceMatch && searchMatch;
+  });
+}
+
+function render() {
+  const filtered = getFiltered();
+  document.getElementById('results-count').textContent = filtered.length;
+
+  // Update counts per cat
+  catOrder.forEach(cat => {
+    const el = document.getElementById('cnt-' + cat);
+    if (!el) return;
+    if(cat === "전체") {
+      el.textContent = data.filter(d => {
+        const priceMatch = activeprice === "전체" || d.price === parseInt(activeprice);
+        const q = document.getElementById('search').value.trim().toLowerCase();
+        const searchMatch = !q || d.name.toLowerCase().includes(q);
+        return priceMatch && searchMatch;
+      }).length;
+    } else {
+      el.textContent = data.filter(d => {
+        const priceMatch = activeprice === "전체" || d.price === parseInt(activeprice);
+        const q = document.getElementById('search').value.trim().toLowerCase();
+        const searchMatch = !q || d.name.toLowerCase().includes(q);
+        return d.cat === cat && priceMatch && searchMatch;
+      }).length;
+    }
+  });
+
+  const content = document.getElementById('content');
+  if(filtered.length === 0) {
+    content.innerHTML = '<div class="no-results">😅 검색 결과가 없어요</div>';
+    return;
+  }
+
+  // Group by location
+  let html = '';
+  locOrder.forEach(loc => {
+    const items = filtered.filter(d => d.loc === loc);
+    if(!items.length) return;
+    html += `
+      <div class="location-group">
+        <div class="location-header">
+          <div class="location-dot"></div>
+          <div class="location-name">📍 ${loc}</div>
+          <div class="location-count">${items.length}개</div>
+        </div>
+        <div class="cards-grid">
+          ${items.map(d => {
+            const cleanName = d.name.replace(/\(([^)]*)\)/g, ' $1').replace(/\s+/g, ' ').trim();
+            const mapsUrl = `https://map.naver.com/v5/search/${encodeURIComponent(cleanName)}`;
+            return `
+            <a class="restaurant-card" data-cat="${d.cat}" href="${mapsUrl}" target="_blank" rel="noopener noreferrer">
+              <div class="card-top">
+                <div class="card-name">${d.name}</div>
+                <div class="card-num">#${d.no}</div>
+              </div>
+              <div class="card-tags">
+                <span class="tag tag-cat">${d.cat}</span>
+                <span class="tag ${getPriceClass(d.price)}">${getPriceLabel(d.price)}</span>
+              </div>
+              <div class="card-addr">${d.addr}</div>
+              <div class="card-bottom">
+                <div class="stars" data-no="${d.no}">
+                  ${[1,2,3,4,5].map(v => `<span class="star" data-val="${v}">★</span>`).join('')}
+                </div>
+                <span class="rating-label" data-no="${d.no}">별점 남기기</span>
+              </div>
+              <div class="map-hint"></div>
+            </a>
+          `}).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  content.innerHTML = html;
+  bindStarEvents();
+  data.forEach(d => updateStars(d.no));
+}
+
+// ── 공항별 식권 사용처 ──────────────────────────
+const airportData = {
+  "김포공항": [
+    { no:1,  loc:"국내선1층",              name:"플레이보6 뉴트로 (푸드코트)",              price:8000, note:"식권1장메뉴 - 직원식권메뉴 / 그 외 메뉴는 식권1장 + 차액지불" },
+    { no:2,  loc:"",                        name:"플레이보6 뉴트로 (트윗젤, 미미네)",        price:5500, note:"직원할인 적용후 식권+차액 지불" },
+    { no:3,  loc:"",                        name:"플레이보6 라이트",                          price:8000, note:"식권1장메뉴 - 직원식권메뉴 / 그 외 메뉴는 식권1장 + 차액지불" },
+    { no:4,  loc:"",                        name:"배꼽집, 유천냉면",                          price:8000, note:"식권1장메뉴 - 직원식권메뉴 / 그 외 메뉴는 직원할인 적용후 식권+차액 지불" },
+    { no:5,  loc:"",                        name:"유미카츠",                                  price:8000, note:"식권1장메뉴 - 직원식권메뉴 / 그 외 메뉴는 직원할인 적용후 식권+차액 지불" },
+    { no:6,  loc:"",                        name:"공차",                                      price:5500, note:"직원할인 적용후 식권+차액 지불" },
+    { no:7,  loc:"",                        name:"엔제리너스",                                price:4500, note:"식권1장메뉴 - 직원식권메뉴 (베이커리+음료) / 그 외 메뉴는 직원할인 적용후 식권+차액 지불" },
+    { no:8,  loc:"",                        name:"할리스커피",                                price:4500, note:"식권1장메뉴 - 직원세트메뉴 / 그 외 메뉴는 직원할인 적용후 식권+차액 지불" },
+    { no:9,  loc:"",                        name:"스테프 핫도그",                             price:4400, note:"식권1장메뉴 - 콤보메뉴 / 그 외 메뉴는 직원할인 적용후 식권+차액 지불" },
+    { no:10, loc:"",                        name:"롯데리아",                                  price:8000, note:"직원할인 적용후 식권+차액 지불" },
+    { no:11, loc:"국내선2층 / 국제선1층",   name:"던킨도너츠",                                price:4500, note:"직원할인 적용후 식권+차액 지불" },
+    { no:12, loc:"국내선 1층",              name:"퀴즈노스",                                  price:8000, note:"식권 1장메뉴 / 그 외 메뉴는 직원할인 10% 적용 후 차액 지불" },
+    { no:13, loc:"국내선 1층",              name:"세븐일레븐 (국내선중앙, 버스정류장점)",     price:5000, note:"식권+차액 지불 / 담배, 주류, 상품권 및 서비스상품은 제외" },
+    { no:14, loc:"국내선 2층",              name:"웰리앤 카페테리아",                          price:8000, note:"식권 1장메뉴 / 2장 메뉴 운영" },
+    { no:15, loc:"국내선 2층",              name:"잠바주스",                                  price:4500, note:"직원할인 적용후 식권+차액 지불" },
+    { no:16, loc:"국내선 4층",              name:"단정 솥밥",                                 price:8000, note:"식권 1장메뉴 / 그 외 메뉴는 직원할인 10% 적용 후 차액 지불" },
+    { no:17, loc:"국내선 4층",              name:"푸드애비뉴 (11개 업체 입점)",               price:8000, note:"식권1장메뉴 - 직원식권메뉴 / 그 외 메뉴는 직원할인 적용후 식권+차액 지불" },
+    { no:18, loc:"국내선 4층",              name:"푸드애비뉴 (아메리칸 트레일러)",            price:6000, note:"직원할인 적용후 식권+차액 지불" },
+    { no:19, loc:"국제선 4층",              name:"대청마루 (푸드코트)",                        price:8000, note:"식권 1장메뉴 / 그 외 메뉴는 직원할인 10% 적용 후 차액 지불" },
+    { no:20, loc:"국제선 4층",              name:"대청마루 (카페)",                            price:4500, note:"직원할인 10% 적용후 식권+차액 지불" },
+    { no:21, loc:"국제선 1층",              name:"파리바게트 (국제선 1층점)",                  price:4500, note:"직원할인 10% 적용후 식권+차액 지불" },
+    { no:22, loc:"국제선 1층",              name:"프랭크버거 (국제선 1층점)",                  price:7000, note:"식권1장메뉴 - 직원식권메뉴 / 그 외 메뉴는 직원할인 10% 적용후 식권+차액 지불" },
+    { no:23, loc:"",                        name:"미소야",                                    price:6000, note:"식권1장+차액 지불" },
+    { no:24, loc:"",                        name:"쇼밥",                                      price:6000, note:"식권1장+차액 지불 / 차액 환불 가능 / 마지막주문 20:30까지" },
+    { no:25, loc:"화물청사",                name:"GS25편의점",                                price:5000, note:"식권+차액 지불 / 담배, 주류, 상품권 및 서비스상품은 제외" },
+    { no:26, loc:"항공지원센터 2층",         name:"하우",                                      price:7500, note:"식권1장메뉴 - 단일메뉴 / 운영시간 : 11:30~13:30" },
+    { no:27, loc:"항공지원센터 1층",         name:"세븐일레븐",                                price:5000, note:"식권+차액 지불 / 담배, 주류, 상품권 및 서비스상품은 제외" },
+    { no:28, loc:"",                        name:"취차이 (중국집)",                           price:5000, note:"식권 1장+차액 지불 / 식권 차액분 마일리지 적립" },
+    { no:29, loc:"",                        name:"강순자 김치찌개",                           price:5000, note:"식권1장+차액 지불" },
+    { no:30, loc:"배달 가능",               name:"청호각 (중국집)",                           price:5000, note:"식권1장메뉴 - 짜장면, 짬뽕, 간짜장, 울면 / 그 외 메뉴는 식권+차액지불" },
+    { no:31, loc:"배달 가능",               name:"장순류 (중국집)",                           price:6500, note:"식권1장+차액 지불 / 평일 오전 10시 30분까지 주문" },
+    { no:32, loc:"배달 가능",               name:"본도시락",                                  price:5500, note:"식권+차액지불 / 평일 오전 10시 30분까지 주문" },
+  ],
+  "인천공항": [
+    { no:1,  loc:"",              name:"SPC",                                          price:5500, note:"사누끼, 파리바게트, 베스킨라빈스, 잠바주스, 스트릿, 라그릴리아, 빚은, 파스쿠찌, 커피앳웍스, 던킨도너츠" },
+    { no:2,  loc:"탑승동/서편",   name:"씨제이프레시웨이 직원식당",                    price:5500, note:"중/석식 식권 1장으로 이용 가능" },
+    { no:3,  loc:"탑승동 등",     name:"엔제리너스 (탑승동, AS서편, 50번GATE)",        price:4500, note:"항공사 직원 할인메뉴 / 이 외 메뉴: 직원할인 15% 적용 후 식권+차액 지불" },
+    { no:4,  loc:"",              name:"아워홈 푸드엠파이어",                           price:6000, note:"식권 1장 + 차액지불 (상주직원 10%할인)" },
+    { no:5,  loc:"",              name:"별미분식",                                      price:7000, note:"식권 1장 + 차액지불 (상주직원 10%할인) 차액 1,000원 미만 환불 가능" },
+    { no:6,  loc:"탑승동",        name:"아모제푸드 구내식당",                           price:5500, note:"조/중/석식 식권1장으로 이용가능" },
+    { no:7,  loc:"탑승동",        name:"아모제푸드 구내식당 매점",                      price:5000, note:"식권+차액 지불 / 담배, 주류, 상품권 및 서비스상품은 제외" },
+    { no:8,  loc:"탑승동 1층",    name:"롯데리아",                                      price:7000, note:"식권1장 + 차액지불 (상주직원 10%할인) / 차액 1,000원 미만 지급" },
+    { no:9,  loc:"1층 10출구",    name:"크리스피크림도넛",                              price:4500, note:"직원할인 10% 적용 후 식권 + 차액 1,000원 미만 지급" },
+    { no:10, loc:"1층 중앙",      name:"빌라드샬롯카페",                                price:4500, note:"직원할인 10% 적용 후 식권 + 차액 1,000원 미만 지급" },
+    { no:11, loc:"1층 중앙점",    name:"플레이팅",                                      price:7000, note:"식권1장 + 차액지불 (상주직원 10%할인)" },
+    { no:12, loc:"",              name:"싱카이",                                        price:7000, note:"식권 1장 + 차액지불 상주직원 10%할인" },
+    { no:13, loc:"4층 전문식당가", name:"아모제푸드",                                   price:5000, note:"서편 4층: 카페아모제, 알라스캐랍, 소복 등 / 동편 4층: 스쿨푸드, 백미당, 한우가" },
+    { no:14, loc:"영종도 신도시",  name:"한솥도시락",                                   price:5000, note:"식권+차액 지불" },
+    { no:15, loc:"",              name:"PHO",                                           price:7000, note:"식권 1장 + 차액지불 상주직원 10%할인" },
+    { no:16, loc:"교통센터점",    name:"버거킹",                                        price:6000, note:"식권 1장 + 차액지불 상주직원 10%할인" },
+    { no:17, loc:"1층 중앙점",    name:"무쿄쿠",                                        price:7000, note:"식권 1장 + 차액지불 상주직원 10%할인" },
+    { no:18, loc:"AS서편",        name:"동원홈푸드 구내식당",                           price:5500, note:"조/중/석식 식권1장으로 이용가능" },
+    { no:19, loc:"T2",            name:"동원홈푸드 구내식당",                           price:5500, note:"조/중/석식 식권1장으로 이용가능" },
+    { no:20, loc:"교통센터점",    name:"컬리너리스퀘어",                                price:7000, note:"식권 1장 + 차액지불 상주직원 10%할인" },
+    { no:21, loc:"여객동 4층",    name:"손수헌",                                        price:7000, note:"식권 1장 + 차액지불 상주직원 10%할인" },
+    { no:22, loc:"여객동 4층",    name:"자연",                                          price:7000, note:"식권 1장 + 차액지불 상주직원 10%할인" },
+    { no:23, loc:"서편",          name:"푸드엠파이어서편",                               price:7000, note:"식권 1장 + 차액지불 상주직원 10%할인" },
+    { no:24, loc:"동편",          name:"푸드엠파이어동편",                               price:7000, note:"식권 1장 + 차액지불 상주직원 10%할인" },
+    { no:25, loc:"",              name:"델리W",                                         price:7000, note:"식권 1장 + 차액지불 상주직원 10%할인" },
+    { no:26, loc:"",              name:"청운미가",                                       price:7000, note:"식권 1장 + 차액지불 상주직원 10%할인" },
+    { no:27, loc:"탑승동/여객동", name:"고메브릿지",                                    price:7000, note:"식권 1장 + 차액지불 상주직원 10%할인" },
+    { no:28, loc:"106,130번GATE", name:"커피빈",                                        price:4500, note:"식권 1장 + 차액지불" },
+    { no:29, loc:"1층 12GATE",    name:"앤제리너스",                                    price:4500, note:"식권 1장 + 차액지불" },
+    { no:30, loc:"탑승동",        name:"엔제리너스",                                    price:4500, note:"식권 1장 + 차액지불" },
+    { no:31, loc:"인천공항 3호점", name:"CU편의점",                                    price:5000, note:"모든 상품 구매 가능 (단, 상품권, 담배, 주류 및 서비스상품은 제외)" },
+    { no:32, loc:"LS동편/AS서편",  name:"아모제푸드 구내식",                            price:5500, note:"중/석식 식권 1장으로 이용 가능" },
+    { no:33, loc:"",              name:"올리브영",                                       price:5000, note:"식권 1장 + 차액지불" },
+  ],
+  "제주공항": [
+    { no:1,  loc:"국내선 4층",   name:"플레이팅",             price:7000, note:"식권 1장 가능 메뉴: 직원식 메뉴(10가지) / 그 외 메뉴 식권 1장 + 차액 지불" },
+    { no:2,  loc:"",             name:"제주향토음식점",        price:6000, note:"식권 1장 차액지불" },
+    { no:3,  loc:"여객동",       name:"파리바게뜨",            price:5000, note:"식권 1장 + 차액지불 (상주 직원 10%할인)" },
+    { no:4,  loc:"탑승동",       name:"파리바게뜨",            price:5000, note:"식권 1장 차액지불 (상주 직원 10%할인) / 1,000원 미만 환불" },
+    { no:5,  loc:"",             name:"1950에어차이나",        price:7500, note:"식권 1장 가능 메뉴: 직원식 메뉴(5가지) / 그 외 메뉴 식권 1장 + 차액 지불" },
+    { no:6,  loc:"1층 1번GATE",  name:"엔제리너스",            price:5000, note:"식권 + 차액지불" },
+    { no:7,  loc:"",             name:"풀잎채 진고복식당",      price:6000, note:"식권 1장 + 차액지불" },
+    { no:8,  loc:"",             name:"에그드랍",              price:5000, note:"식권1장 + 차액지불" },
+    { no:9,  loc:"",             name:"프랭크버거",            price:7000, note:"식권1장 + 차액지불" },
+    { no:10, loc:"",             name:"꿈의요리애월",           price:6500, note:"식권 1장 차액지불" },
+    { no:11, loc:"",             name:"잠바주스",              price:4500, note:"식권1장 + 차액지불 상주직원 10%할인" },
+    { no:12, loc:"",             name:"미도인",                price:7000, note:"식권 + 차액지불 상주직원할인 10%" },
+    { no:13, loc:"",             name:"롯데리아",              price:7000, note:"식권1장 + 차액지불" },
+    { no:14, loc:"푸드코트",     name:"아워홈",                price:7000, note:"식권1장 + 차액지불 상주직원 10%할인" },
+    { no:15, loc:"탑승동",       name:"엔제리너스",            price:5000, note:"식권 + 차액지불" },
+  ],
+  "대구공항": [
+    { no:1,  loc:"",                   name:"순한우한마당",              price:7000, note:"식권 1장 메뉴" },
+    { no:2,  loc:"국제선점",           name:"CU편의점",                  price:5000, note:"모든 상품 구매 가능 (단, 상품권, 담배, 주류 및 서비스상품은 제외)" },
+    { no:3,  loc:"",                   name:"이디야",                    price:4500, note:"식권1장 + 차액지불" },
+    { no:4,  loc:"",                   name:"공차",                      price:5000, note:"식권1장 + 차액지불" },
+    { no:5,  loc:"",                   name:"식사이어티",                price:7000, note:"식권1장 + 차액지불" },
+    { no:6,  loc:"",                   name:"어탕국수",                  price:7000, note:"식권 1장 메뉴" },
+    { no:7,  loc:"",                   name:"동화식당",                  price:7000, note:"식권 1장 메뉴" },
+    { no:8,  loc:"",                   name:"홍유 (중국집)",             price:6000, note:"식권 1장 + 차액 지불" },
+    { no:9,  loc:"",                   name:"이마트24",                  price:5000, note:"모든 상품 구매 가능 (단, 상품권, 담배, 주류 및 서비스상품은 제외)" },
+    { no:10, loc:"1층 1번 게이트 우측", name:"오사카키친",               price:7000, note:"운영시간: 06:00~22:00 / 직원 메뉴(식권 1장) 8종 외 20% 할인" },
+    { no:11, loc:"",                   name:"달콤커피",                  price:5500, note:"식권1장 + 차액지불" },
+    { no:12, loc:"",                   name:"축억의면",                  price:5000, note:"식권1장 + 차액지불" },
+    { no:13, loc:"",                   name:"크리스피도넛",              price:4500, note:"식권1장 + 차액지불" },
+    { no:14, loc:"KT대구지사1층점",    name:"CU편의점",                  price:5000, note:"모든 상품 구매 가능 (단, 상품권, 담배, 주류 및 서비스상품은 제외)" },
+    { no:15, loc:"",                   name:"모두국밥",                  price:5000, note:"식권 1장 + 차액 지불 (현금만)" },
+    { no:16, loc:"",                   name:"던킨도너츠",                price:4500, note:"식권1장 + 차액지불" },
+    { no:17, loc:"",                   name:"킹콩부대찌개 전문점",       price:7000, note:"식권 1장 + 차액 지불" },
+    { no:18, loc:"",                   name:"롯데리아",                  price:0,    note:"식권 1장 메뉴 (불고기/새우, 핫크리스피콤보버거) / 기타메뉴 식권 1장 + 차액 결제" },
+    { no:19, loc:"서편",               name:"엔제리너스",                price:0,    note:"음료 및 베이커리류 직원할인 20% 적용후 식권 사용 가능" },
+  ],
+  "광주공항": [
+    { no:1,  loc:"", name:"DH푸드",           price:6000, note:"식권 1장 메뉴 + 차액지불" },
+    { no:2,  loc:"", name:"웰리앤",            price:5000, note:"식권1장 + 차액지불" },
+    { no:3,  loc:"", name:"가마솥국밥",        price:6000, note:"식권 1장 + 차액 지불" },
+    { no:4,  loc:"", name:"토스트럭",          price:4500, note:"식권 1장 + 차액 지불" },
+    { no:5,  loc:"", name:"동해반점",          price:6000, note:"식권1장 + 차액지불" },
+    { no:6,  loc:"", name:"남가네 설악추어탕", price:7000, note:"식권1장 + 차액지불" },
+    { no:7,  loc:"", name:"제주삼다흑돈",      price:5000, note:"식권1장 + 차액지불" },
+    { no:8,  loc:"광주공항점", name:"GS편의점", price:5000, note:"식권+차액 지불 / 담배, 주류, 상품권 및 서비스상품은 제외" },
+    { no:9,  loc:"광주 송정점", name:"파리바게뜨", price:5000, note:"식권 1장 + 차액 지불" },
+    { no:10, loc:"광주공항점", name:"드롭탑카페", price:4500, note:"식권 1장 + 차액 지불" },
+  ],
+  "김해공항": [
+    { no:1,  loc:"국내선 3층",   name:"플레이팅",             price:7000, note:"식권 1장 가능 메뉴: 직원식 메뉴 / 이 외 메뉴: 직원할인 적용 후 식권+차액 지불" },
+    { no:2,  loc:"국제선점",     name:"플레이팅",             price:7000, note:"식권 1장 가능 메뉴: 직원식 메뉴 / 이 외 메뉴: 직원할인 적용 후 식권+차액 지불" },
+    { no:3,  loc:"김해공항점",   name:"명가의뜰",             price:7000, note:"식권1장 + 차액 지불 (직원할인 20% 적용)" },
+    { no:4,  loc:"김해공항점",   name:"한와담",               price:7000, note:"식권1장 + 차액 지불 (직원할인 10% 적용)" },
+    { no:5,  loc:"국제선점",     name:"이디야",               price:4500, note:"식권 1장 + 차액지불" },
+    { no:6,  loc:"국내선점",     name:"이디야",               price:4500, note:"식권 1장 + 차액지불" },
+    { no:7,  loc:"김해공항점",   name:"던킨도너츠",           price:4500, note:"직원할인 10% 적용 후 식권 사용 / 80% 이상 사용 시 차액 지급" },
+    { no:8,  loc:"",             name:"미도어묵",             price:5000, note:"식권 1장 + 차액지불" },
+    { no:9,  loc:"구내식당",     name:"풀무원푸드앤컬처",     price:6000, note:"식권 1장 단일 메뉴" },
+    { no:10, loc:"김해공항점",   name:"뚜레쥬르",             price:4500, note:"식권 1장 + 차액지불" },
+    { no:11, loc:"김해공항점",   name:"요거프레소",           price:4500, note:"식권 1장 + 차액지불" },
+    { no:12, loc:"김해공항점",   name:"신마트",               price:4500, note:"식권 1장 + 차액지불" },
+    { no:13, loc:"1층, 2층",     name:"CU편의점",             price:5000, note:"모든 상품 구매 가능 (단, 상품권, 담배, 주류 및 서비스상품은 제외)" },
+    { no:14, loc:"국내선점",     name:"CU편의점",             price:5000, note:"모든 상품 구매 가능 (단, 상품권, 담배, 주류 및 서비스상품은 제외)" },
+    { no:15, loc:"김해공항점",   name:"뉴욕버거",             price:6000, note:"식권1장 + 차액지불" },
+    { no:16, loc:"김해공항점",   name:"모리셔스",             price:6000, note:"식권 1장 + 차액지불" },
+    { no:17, loc:"국제점",       name:"아델라7",              price:4500, note:"식권 1장 + 차액지불" },
+    { no:18, loc:"국제선점",     name:"롯데리아",             price:7000, note:"식권 1장 + 차액지불" },
+    { no:19, loc:"김해공항점",   name:"한스푼",               price:7000, note:"식권 1장 + 차액지불" },
+    { no:20, loc:"국제선 출국장", name:"엔제리너스",           price:4500, note:"식권 + 차액지불 직원할인 15%" },
+    { no:21, loc:"국내선점 2층", name:"엔제리너스",           price:4500, note:"식권 + 차액지불 직원할인 15%" },
+    { no:22, loc:"국내선 3층",   name:"엔제리너스",           price:4500, note:"식권 + 차액지불 직원할인 15%" },
+    { no:23, loc:"국내선 2층",   name:"메가커피",             price:4500, note:"식권 + 차액지불 직원할인 10%" },
+    { no:24, loc:"국제선 출국장", name:"K라면",               price:7000, note:"식권 1장 + 차액지불" },
+    { no:25, loc:"국제선 2층",   name:"플레이보6",            price:7000, note:"식권 + 차액지불 직원할인 20%" },
+    { no:26, loc:"국제선 2층",   name:"말똥 도넛",            price:4500, note:"식권 + 차액지불 직원할인 10%" },
+    { no:27, loc:"국제선점",     name:"나드리",               price:7000, note:"식권 + 차액지불 직원할인 10%" },
+    { no:28, loc:"",             name:"투썸플레이스",         price:4500, note:"식권 + 차액지불 직원할인 10%" },
+    { no:29, loc:"",             name:"앤티앤스",             price:4500, note:"식권 + 차액지불 직원할인 10%" },
+    { no:30, loc:"중앙 크라운점", name:"CU편의점",            price:5000, note:"식권+차액 지불 / 담배, 주류, 상품권 및 서비스상품은 제외" },
+    { no:31, loc:"부산대저평강점", name:"이마트24",           price:5000, note:"식권+차액 지불 / 담배, 주류, 상품권 및 서비스상품은 제외" },
+    { no:32, loc:"도시락 배달",  name:"수현밥집",             price:7700, note:"식권1장메뉴 / 그 외의 메뉴는 식권+차액지불" },
+    { no:33, loc:"국제선점",     name:"효자곰탕",             price:7000, note:"식권 1장 + 차액지불" },
+  ],
+  "청주공항": [
+    { no:1,  loc:"",           name:"플레이보6",             price:8000, note:"식권 1장 (8,500원 메뉴까지 이용가능) + 차액지불 (상주직원 10% 할인)" },
+    { no:2,  loc:"국제선/국내선", name:"투썸플레이스",       price:4500, note:"식권 1장 + 차액지불" },
+    { no:3,  loc:"국제선점",   name:"곤트란쉐리에",          price:4500, note:"식권 1장 + 차액지불" },
+    { no:4,  loc:"국내선점",   name:"미스터호떡",            price:4500, note:"식권 1장 + 차액지불" },
+    { no:5,  loc:"국내선점",   name:"뵈르뵈르",              price:4500, note:"식권 1장 + 차액지불" },
+    { no:6,  loc:"국내선점",   name:"노브랜드버거",          price:8000, note:"식권 1장 + 차액지불" },
+    { no:7,  loc:"",           name:"백년가게",              price:8000, note:"식권1장 + 차액지불 상주직원 10%할인" },
+    { no:8,  loc:"",           name:"한와담",                price:8000, note:"식권1장 + 차액지불 상주직원 10%할인" },
+    { no:9,  loc:"",           name:"제이에스지 (중식)",     price:7500, note:"식권 1장 단일 메뉴 (중식)" },
+    { no:10, loc:"",           name:"제이에스지 (석식)",     price:5500, note:"식권 1장 단일 메뉴 (석식)" },
+    { no:11, loc:"",           name:"홍콩 중화요리",         price:5000, note:"식권 1장 + 차액지불" },
+    { no:12, loc:"오창본점",   name:"고래부대찌개",          price:6000, note:"식권 1장 + 차액지불" },
+    { no:13, loc:"1층점",      name:"커피니",                price:4500, note:"기본 커피류 직원할인 20% / 신제품 및 베이커리 직원할인 10%" },
+    { no:14, loc:"국내선점",   name:"커피니",                price:4500, note:"기본 커피류 직원할인 20% / 신제품 및 베이커리 직원할인 10%" },
+    { no:15, loc:"국제선점",   name:"커피니",                price:4500, note:"기본 커피류 직원할인 20% / 신제품 및 베이커리 직원할인 10%" },
+    { no:16, loc:"청주 오창점", name:"은희네해장국",         price:6000, note:"식권 1장 + 차액지불" },
+  ],
+  "양양공항": [
+    { no:1, loc:"", name:"청솔식당",      price:7000, note:"식권 1장 가능메뉴: 백반, 찌게종류" },
+    { no:2, loc:"", name:"커피에 반하다", price:4500, note:"식권 1장 차액지불 (1,000원 미만 차액 지불)" },
+    { no:3, loc:"", name:"양양기사님식당", price:6500, note:"식권 1장 가능메뉴: 백반 / 이 외 메뉴: 식권 1장 + 차액 지불 (차액 환급 불가)" },
+  ],
+  "부천대학교": [
+    { no:1, loc:"", name:"기라성",       price:5000, note:"식권 1장 + 차액 지불" },
+    { no:2, loc:"", name:"스시갑",       price:5000, note:"식권 1장 + 차액 지불" },
+    { no:3, loc:"", name:"크라이치즈버거", price:4500, note:"식권 1장 + 차액 지불" },
+  ],
+};
+
+function getPriceBadgeClass(p) {
+  if (p >= 7000) return 'price-high';
+  if (p >= 5000) return 'price-mid';
+  return 'price-low';
+}
+
+function renderAirportTable(airport) {
+  const items = airportData[airport];
+  if (!items) return '';
+  const rows = items.map(d => {
+    const priceText = d.price > 0 ? d.price.toLocaleString() + '원' : '직원할인';
+    const badgeClass = d.price > 0 ? getPriceBadgeClass(d.price) : 'price-low';
+    return `<tr>
+      <td>${d.no}</td>
+      <td><strong>${d.name}</strong>${d.loc ? `<br><span style="font-size:11px;color:#9e968c;">${d.loc}</span>` : ''}</td>
+      <td><span class="price-badge-airport ${badgeClass}">${priceText}</span></td>
+      <td class="airport-note">${d.note}</td>
+    </tr>`;
+  }).join('');
+  return `<table class="airport-table">
+    <thead><tr><th>#</th><th>업체명</th><th>식권가격</th><th>비고</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// 공항 탭 초기 렌더
+(function initAirport() {
+  const wrap = document.getElementById('airport-content-wrap');
+  const firstAirport = '김포공항';
+  wrap.innerHTML = `<div class="airport-content active">${renderAirportTable(firstAirport)}</div>`;
+
+  document.querySelectorAll('.airport-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.airport-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      wrap.innerHTML = `<div class="airport-content active">${renderAirportTable(btn.dataset.airport)}</div>`;
+    });
+  });
+})();
+// ────────────────────────────────────────────────
+
+// ── 모드 전환 (신사옥 주변 / 공항) ──────────────
+document.getElementById('mode-maogok').addEventListener('click', function() {
+  this.classList.add('active');
+  document.getElementById('mode-airport').classList.remove('active');
+  document.getElementById('maogok-wrap').classList.remove('hidden');
+  document.getElementById('airport-wrap').classList.remove('visible');
+  setTimeout(() => { if(typeof map !== 'undefined') map.invalidateSize(); }, 150);
+});
+
+document.getElementById('mode-airport').addEventListener('click', function() {
+  this.classList.add('active');
+  document.getElementById('mode-maogok').classList.remove('active');
+  document.getElementById('maogok-wrap').classList.add('hidden');
+  document.getElementById('airport-wrap').classList.add('visible');
+});
+// ────────────────────────────────────────────────
+
+// Events
+document.querySelectorAll('.cat-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activecat = btn.dataset.cat;
+    render();
+  });
+});
+
+document.querySelectorAll('.price-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.price-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeprice = btn.dataset.price;
+    render();
+  });
+});
+
+document.getElementById('search').addEventListener('input', render);
+
+// Init
+render();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// 업체별 좌표 (마곡 지역 주요 건물 기준)
+const coords = {
+  // 마곡중앙로 143 (르웨스트시티/코엑스)
+  "마곡중앙로 143": [37.5604, 126.8281],
+  // 마곡중앙5로 6 (보타닉푸르지오시티)
+  "마곡중앙5로 6": [37.5618, 126.8338],
+  // 마곡중앙로 161
+  "마곡중앙로 161-17": [37.5630, 126.8352],
+  "마곡중앙로 161-22": [37.5632, 126.8356],
+  "마곡중앙로 161-11": [37.5628, 126.8350],
+  "마곡중앙로 161-8":  [37.5626, 126.8354],
+  "마곡중앙로 161-1":  [37.5624, 126.8348],
+  // 마곡중앙로 165
+  "마곡중앙로 165": [37.5636, 126.8360],
+  // 마곡중앙5로1길
+  "마곡중앙5로1길 20": [37.5621, 126.8344],
+  "마곡중앙5로1길 21": [37.5622, 126.8346],
+  // 공항대로 165 (원그로브)
+  "공항대로 165": [37.5562, 126.8305],
+  "공항대로165":  [37.5562, 126.8305],
+  // 마곡서로
+  "마곡서로 152": [37.5572, 126.8280],
+  "마곡서로 158": [37.5575, 126.8285],
+  "마곡서로 101": [37.5578, 126.8340],
+  "마곡서로 133": [37.5555, 126.8315],
+  // 기타
+  "양천로30길 123": [37.5650, 126.8395],
+  "마곡중앙5로 18": [37.5614, 126.8308],
+  "마곡중앙5로 22": [37.5610, 126.8298],
+  "마곡중앙8로5길 11": [37.5558, 126.8342],
+  "마곡중앙로 111": [37.5618, 126.8348],
+  "마곡중앙로6로 42": [37.5608, 126.8292],
+};
+
+function getCoords(addr) {
+  for (const key in coords) {
+    if (addr.includes(key)) return coords[key];
+  }
+  return null;
+}
+
+const catColors = {
+  "한식": "#a33226", "중식": "#b8441a", "일식": "#5c4080",
+  "양식": "#1a5a78", "카페·디저트": "#6b5030", "편의점": "#285e3e", "기타": "#555050"
+};
+
+function makeIcon(cat) {
+  const color = catColors[cat] || '#6b6158';
+  const emoji = { "한식": "🍲", "중식": "🥟", "일식": "🍣", "양식": "🍔", "카페·디저트": "☕", "편의점": "🏪", "기타": "🍽️" }[cat] || "🍽️";
+  const svg = `
+    <div style="position:relative;width:36px;height:44px;">
+      <div style="
+        width:36px; height:36px;
+        background:${color};
+        border-radius:50% 50% 50% 4px;
+        transform:rotate(45deg);
+        box-shadow:0 3px 8px rgba(0,0,0,0.3);
+        display:flex; align-items:center; justify-content:center;
+        border:2px solid rgba(255,255,255,0.5);
+      ">
+        <div style="transform:rotate(-45deg); font-size:15px; line-height:1;">${emoji}</div>
+      </div>
+    </div>`;
+  return L.divIcon({
+    html: svg,
+    className: '',
+    iconSize: [36, 44],
+    iconAnchor: [18, 44],
+    popupAnchor: [0, -46]
+  });
+}
+
+// 소노트리니티 좌표 (정중앙)
+const BASE_CENTER = [37.5604, 126.8281];
+
+// 지도 초기화 — CartoDB Positron (깔끔한 밝은 스타일)
+const map = L.map('map', {
+  zoomControl: false,
+  scrollWheelZoom: true
+}).setView(BASE_CENTER, 15);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  attribution: '© OpenStreetMap © CARTO',
+  subdomains: 'abcd',
+  maxZoom: 19
+}).addTo(map);
+
+// 초기 로딩 시 크기 보정
+setTimeout(() => map.invalidateSize(), 300);
+
+// 줌 컨트롤 오른쪽 하단
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+// 소노트리니티 기준점 마커
+const baseIcon = L.divIcon({
+  html: `<div style="
+    background:#4e4840;
+    color:#fff;
+    font-size:11px;
+    font-weight:700;
+    padding:5px 10px;
+    border-radius:6px;
+    white-space:nowrap;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+    font-family:'Noto Sans KR',sans-serif;
+    letter-spacing:-0.3px;
+  ">🏢 소노트리니티</div>`,
+  className: '',
+  iconAnchor: [58, 14]
+});
+L.marker(BASE_CENTER, { icon: baseIcon, zIndexOffset: 1000 }).addTo(map);
+
+// 반경 원
+L.circle(BASE_CENTER, {
+  radius: 700,
+  color: '#6b6158',
+  fillColor: '#6b6158',
+  fillOpacity: 0.04,
+  weight: 1,
+  dashArray: '4 4',
+}).addTo(map);
+
+// 업체 마커
+data.forEach(d => {
+  const latlng = getCoords(d.addr);
+  if (!latlng) return;
+  const cleanName = d.name.replace(/\(([^)]*)\)/g, ' $1').replace(/\s+/g, ' ').trim();
+  const mapsUrl = `https://map.naver.com/v5/search/${encodeURIComponent(cleanName)}`;
+  const color = catColors[d.cat] || '#6b6158';
+  const marker = L.marker(latlng, { icon: makeIcon(d.cat) }).addTo(map);
+  marker.bindPopup(`
+    <div style="min-width:160px;">
+      <div style="font-weight:700;font-size:13px;color:#3a3530;margin-bottom:3px;">${d.name}</div>
+      <div style="font-size:11px;margin-bottom:6px;">
+        <span style="background:${color};color:#fff;padding:1px 7px;border-radius:10px;font-weight:500;">${d.cat}</span>
+        <span style="color:#9e968c;margin-left:5px;">${d.price.toLocaleString()}원권</span>
+      </div>
+      <a href="${mapsUrl}" target="_blank" style="
+        display:inline-flex;align-items:center;gap:4px;
+        font-size:11px;color:#fff;font-weight:600;
+        background:#6b6158;
+        padding:4px 10px;border-radius:6px;
+        text-decoration:none;
+      ">🗺️ 네이버 지도 보기</a>
+    </div>
+  `, { maxWidth: 220 });
+});
+
+// 지하철역 마커
+const subwayStations = [
+  { name: "마곡나루역", lines: ["9호선", "공항철도"], colors: ["#BDB427", "#0065B3"], latlng: [37.5637, 126.8283] },
+  { name: "마곡역",    lines: ["5호선"],             colors: ["#996CAC"],            latlng: [37.5592, 126.8233] },
+];
+
+subwayStations.forEach(st => {
+  const badges = st.lines.map((l, i) =>
+    `<span style="background:${st.colors[i]};color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:3px;">${l}</span>`
+  ).join('');
+
+  const icon = L.divIcon({
+    html: `
+      <div style="
+        background:#fff;
+        border:2.5px solid #333;
+        border-radius:50%;
+        width:22px; height:22px;
+        display:flex; align-items:center; justify-content:center;
+        box-shadow:0 2px 8px rgba(0,0,0,0.25);
+        font-size:12px;
+      ">🚇</div>
+      <div style="
+        background:rgba(255,255,255,0.95);
+        color:#222;
+        font-size:11px;
+        font-weight:700;
+        padding:2px 7px;
+        border-radius:5px;
+        white-space:nowrap;
+        box-shadow:0 1px 6px rgba(0,0,0,0.15);
+        font-family:'Noto Sans KR',sans-serif;
+        margin-top:2px;
+        text-align:center;
+      ">${st.name}</div>`,
+    className: '',
+    iconSize: [80, 48],
+    iconAnchor: [40, 22],
+    popupAnchor: [0, -28]
+  });
+
+  L.marker(st.latlng, { icon, zIndexOffset: 900 })
+    .addTo(map)
+    .bindPopup(`<div style="font-weight:700;font-size:13px;margin-bottom:5px;">🚇 ${st.name}</div><div>${badges}</div>`, { maxWidth: 200 });
+});
+
+// 범례
+const legend = L.control({ position: 'bottomleft' });
+legend.onAdd = function() {
+  const div = L.DomUtil.create('div');
+  div.style.cssText = `
+    background:white;padding:10px 14px;border-radius:10px;
+    box-shadow:0 2px 12px rgba(0,0,0,0.12);
+    font-family:'Noto Sans KR',sans-serif;font-size:11px;
+    line-height:1.9;
+  `;
+  div.innerHTML = Object.entries(catColors).map(([cat, color]) =>
+    `<div><span style="display:inline-block;width:10px;height:10px;background:${color};border-radius:50%;margin-right:5px;vertical-align:middle;"></span>${cat}</div>`
+  ).join('');
+  return div;
+};
+legend.addTo(map);
+</script>
+</body>
+</html>
