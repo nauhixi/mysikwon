@@ -486,10 +486,19 @@
   }
 
   /* Mode switch buttons */
+  .header-title-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .header-title-row .header-title {
+    margin-bottom: 0;
+  }
   .mode-switch {
     display: flex;
     gap: 8px;
-    margin-top: 20px;
   }
   .mode-btn {
     padding: 8px 20px;
@@ -612,11 +621,12 @@
   <div class="header-inner">
     <div class="ci-logo">Sono Trinity<span></span>Meal Ticket Guide</div>
     <div class="header-label">마곡 캠퍼스 · 식권 가이드</div>
-    <div class="header-title">식권 사용 가능 업체</div>
-
-    <div class="mode-switch">
-      <button class="mode-btn active" id="mode-maogok">🏢 신사옥 주변</button>
-      <button class="mode-btn" id="mode-airport">✈️ 공항</button>
+    <div class="header-title-row">
+      <div class="header-title">식권 사용 가능 업체</div>
+      <div class="mode-switch">
+        <button class="mode-btn active" id="mode-maogok">🏢 신사옥 주변</button>
+        <button class="mode-btn" id="mode-airport">✈️ 공항</button>
+      </div>
     </div>
     <div class="header-stats">
       <div class="stat-item">
